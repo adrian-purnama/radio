@@ -19,7 +19,6 @@ export function PlayerShell() {
   const [overlayVisible, setOverlayVisible] = useState(false);
   const baseCoverRef = useRef<string | null>(null);
   const {
-    audioRef,
     currentSong,
     queue,
     mode,
@@ -47,20 +46,6 @@ export function PlayerShell() {
   } =
     usePlayer();
 
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
-
-    const onEnded = () => {
-      void goToNextSong();
-    };
-
-    audio.addEventListener("ended", onEnded);
-    return () => audio.removeEventListener("ended", onEnded);
-  }, [audioRef, goToNextSong]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -135,9 +120,7 @@ export function PlayerShell() {
           style={{ backgroundImage: `url(${overlayCoverUrl})` }}
         />
       ) : null}
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/65 to-black/75" />
-
-      <audio ref={audioRef} preload="auto" />
+      <div className="absolute inset-0 z-0 bg-linear-to-b from-black/65 to-black/75" />
 
       <Link
         href="/landing"

@@ -31,8 +31,11 @@ const PLAYLISTS_STORAGE_KEY = "radio.playlists";
 const SELECTED_PLAYLIST_STORAGE_KEY = "radio.selectedPlaylistId";
 
 export function usePlayer() {
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioReady, setAudioReady] = useState(false);
   const previousSongsRef = useRef<PlaybackSong[]>([]);
+  const goToNextSongRef = useRef<() => Promise<void>>(async () => undefined);
+  const autoplayUnlockBoundRef = useRef(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [albums, setAlbums] = useState<AlbumOption[]>([]);
@@ -41,6 +44,18 @@ export function usePlayer() {
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
   const { currentSong, queue, mode, isPlaying, setCurrentSong, setQueue, setMode, setPlaying } =
     usePlayerStore();
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const audio = document.getElementById("global-radio-audio") as HTMLAudioElement | null;
+    if (audio) {
+      audioRef.current = audio;
+      setAudioReady(true);
+    }
+  }, []);
 
   useEffect(() => {
     apiFetch<PlaybackResponse>("/api/playback/current")
@@ -111,23 +126,32 @@ export function usePlayer() {
     }
 
     if (currentSong?.audioUrl) {
-      audio.src = currentSong.audioUrl;
-      audio.load();
-      setTimeout(() => {
-        setCurrentTime(0);
-        setDuration(0);
-      }, 0);
+      const currentSrc = audio.getAttribute("src") ?? "";
+      const isSameTrack = currentSrc === currentSong.audioUrl;
+      if (!isSameTrack) {
+        audio.src = currentSong.audioUrl;
+        audio.load();
+        setTimeout(() => {
+          setCurrentTime(0);
+          setDuration(0);
+        }, 0);
+      }
       if (isPlaying) {
         void audio.play().catch(() => undefined);
       }
     }
-  }, [currentSong, isPlaying]);
+  }, [audioReady, currentSong, isPlaying]);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) {
       return;
     }
+
+    const syncNow = () => {
+      setCurrentTime(audio.currentTime || 0);
+      setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
+    };
 
     const onTimeUpdate = () => {
       setCurrentTime(audio.currentTime || 0);
@@ -137,20 +161,96 @@ export function usePlayer() {
       setDuration(audio.duration || 0);
     };
 
+    const onDurationChange = () => {
+      setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
+    };
+
     const onEnded = () => {
       setCurrentTime(0);
+      void goToNextSongRef.current();
     };
 
     audio.addEventListener("timeupdate", onTimeUpdate);
     audio.addEventListener("loadedmetadata", onLoadedMetadata);
+    audio.addEventListener("durationchange", onDurationChange);
     audio.addEventListener("ended", onEnded);
+    syncNow();
 
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
       audio.removeEventListener("loadedmetadata", onLoadedMetadata);
+      audio.removeEventListener("durationchange", onDurationChange);
       audio.removeEventListener("ended", onEnded);
     };
-  }, []);
+  }, [audioReady]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !isPlaying) {
+      return;
+    }
+
+    let disposed = false;
+
+    const unlockAndPlay = () => {
+      if (disposed) {
+        return;
+      }
+      void audio.play().catch(() => undefined);
+      window.removeEventListener("pointerdown", unlockAndPlay);
+      window.removeEventListener("keydown", unlockAndPlay);
+      autoplayUnlockBoundRef.current = false;
+    };
+
+    void audio.play().catch(() => {
+      if (autoplayUnlockBoundRef.current) {
+        return;
+      }
+      autoplayUnlockBoundRef.current = true;
+      window.addEventListener("pointerdown", unlockAndPlay, { once: true });
+      window.addEventListener("keydown", unlockAndPlay, { once: true });
+    });
+
+    return () => {
+      disposed = true;
+      if (autoplayUnlockBoundRef.current) {
+        window.removeEventListener("pointerdown", unlockAndPlay);
+        window.removeEventListener("keydown", unlockAndPlay);
+        autoplayUnlockBoundRef.current = false;
+      }
+    };
+  }, [audioReady, isPlaying, currentSong?.id]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code !== "Space") {
+        return;
+      }
+
+      const target = event.target as HTMLElement | null;
+      if (target) {
+        const tag = target.tagName.toLowerCase();
+        const isTypingTarget =
+          tag === "input" ||
+          tag === "textarea" ||
+          tag === "select" ||
+          target.isContentEditable;
+        if (isTypingTarget) {
+          return;
+        }
+      }
+
+      event.preventDefault();
+      setPlaying(!isPlaying);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isPlaying, setPlaying]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -163,7 +263,7 @@ export function usePlayer() {
     } else {
       audio.pause();
     }
-  }, [isPlaying]);
+  }, [audioReady, isPlaying]);
 
   async function goToNextSong() {
     if (mode === "playlist-loop") {
@@ -214,6 +314,10 @@ export function usePlayer() {
     setCurrentSong(data.song);
     setQueue(data.queue);
   }
+
+  useEffect(() => {
+    goToNextSongRef.current = goToNextSong;
+  }, [goToNextSong]);
 
   function goToPreviousSong() {
     const history = previousSongsRef.current;

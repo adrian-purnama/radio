@@ -239,7 +239,7 @@ export function LandingPage() {
       >
         <div className="mb-12 flex flex-wrap items-end justify-between gap-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-violet-600/75">The Catalog</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-white-600/75">The Catalog</p>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-100 md:text-4xl">
               Every record, every sleeve.
             </h2>
@@ -280,7 +280,7 @@ export function LandingPage() {
                     }`}
                   >
                     <div
-                      className="album-vinyl pointer-events-none absolute inset-0 z-0 translate-x-[3.4rem] rounded-full bg-[radial-gradient(circle_at_center,#0f172a_0%,#0f172a_28%,#1e293b_32%,#0f172a_34%,#1e293b_36%,#0f172a_40%,#020617_90%)] shadow-[0_18px_45px_rgba(15,23,42,0.35)]"
+                      className="album-vinyl pointer-events-none absolute inset-0 z-0 translate-x-[3.4rem] rounded-full bg-[radial-gradient(circle_at_center,#0f172a_0%,#0f172a_28%,#1e293b_32%,#0f172a_34%,#1e293b_36%,#0f172a_40%,#020617_90%)] shadow-[0_18px_45px_rgba(15,23,42,0.35)] border-2 border-amber-500"
                       aria-hidden
                     >
                       <div className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-400" />
