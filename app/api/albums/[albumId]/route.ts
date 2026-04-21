@@ -29,6 +29,15 @@ type Params = {
   params: Promise<{ albumId: string }>;
 };
 
+/** Native collection.findOne returns generic Document; cast after read (same fields as lean). */
+type AlbumLeanForPatch = {
+  _id: unknown;
+  name: string;
+  coverImageFileId: unknown;
+  isAdminFavorite?: boolean;
+  links?: unknown;
+};
+
 export async function PATCH(request: Request, { params }: Params) {
   const session = await requireAdminSession();
   if (session instanceof NextResponse) {
@@ -79,13 +88,7 @@ export async function PATCH(request: Request, { params }: Params) {
     const keys = Object.keys(updateData);
     const favoriteOnly = keys.length === 1 && keys[0] === "isAdminFavorite";
 
-    let album: {
-      _id: unknown;
-      name: string;
-      coverImageFileId: unknown;
-      isAdminFavorite?: boolean;
-      links?: unknown;
-    } | null;
+    let album: AlbumLeanForPatch | null;
 
     if (favoriteOnly) {
       const result = await AlbumModel.collection.updateOne(
@@ -95,13 +98,13 @@ export async function PATCH(request: Request, { params }: Params) {
       if (result.matchedCount === 0) {
         return NextResponse.json({ error: "Album not found" }, { status: 404 });
       }
-      album = await AlbumModel.collection.findOne({ _id: albumObjectId });
+      album = (await AlbumModel.collection.findOne({ _id: albumObjectId })) as AlbumLeanForPatch | null;
     } else {
-      album = await AlbumModel.findByIdAndUpdate(
+      album = (await AlbumModel.findByIdAndUpdate(
         albumObjectId,
         { $set: updateData },
         { new: true },
-      ).lean();
+      ).lean()) as AlbumLeanForPatch | null;
     }
 
     if (!album) {

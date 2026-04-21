@@ -28,6 +28,17 @@ type Params = {
   params: Promise<{ albumId: string; songId: string }>;
 };
 
+/** Native collection.findOne returns generic Document; cast after read (same fields as lean). */
+type SongLeanForPatch = {
+  _id: unknown;
+  title: string;
+  albumId: unknown;
+  audioFileId: unknown;
+  orderIndex: number;
+  isAdminFavorite?: boolean;
+  links?: unknown;
+};
+
 export async function PATCH(request: Request, { params }: Params) {
   const session = await requireAdminSession();
   if (session instanceof NextResponse) {
@@ -80,15 +91,7 @@ export async function PATCH(request: Request, { params }: Params) {
     const keys = Object.keys(updateData);
     const favoriteOnly = keys.length === 1 && keys[0] === "isAdminFavorite";
 
-    let song: {
-      _id: unknown;
-      title: string;
-      albumId: unknown;
-      audioFileId: unknown;
-      orderIndex: number;
-      isAdminFavorite?: boolean;
-      links?: unknown;
-    } | null;
+    let song: SongLeanForPatch | null;
 
     if (favoriteOnly) {
       const result = await SongModel.collection.updateOne(
@@ -98,16 +101,16 @@ export async function PATCH(request: Request, { params }: Params) {
       if (result.matchedCount === 0) {
         return NextResponse.json({ error: "Song not found" }, { status: 404 });
       }
-      song = await SongModel.collection.findOne({
+      song = (await SongModel.collection.findOne({
         _id: songObjectId,
         albumId: albumObjectId,
-      });
+      })) as SongLeanForPatch | null;
     } else {
-      song = await SongModel.findOneAndUpdate(
+      song = (await SongModel.findOneAndUpdate(
         { _id: songObjectId, albumId: albumObjectId },
         { $set: updateData },
         { new: true },
-      ).lean();
+      ).lean()) as SongLeanForPatch | null;
     }
 
     if (!song) {
