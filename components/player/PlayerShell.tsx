@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 import { usePlayer } from "@/hooks/usePlayer";
 import { NowPlaying } from "@/components/player/NowPlaying";
@@ -137,6 +138,13 @@ export function PlayerShell() {
       <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/65 to-black/75" />
 
       <audio ref={audioRef} preload="auto" />
+
+      <Link
+        href="/landing"
+        className="fixed top-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/35 px-3 py-1.5 text-[11px] font-medium tracking-[0.08em] text-white/75 backdrop-blur-md transition hover:bg-black/50 hover:text-white"
+      >
+        Explore
+      </Link>
 
       <div className="fixed top-4 right-4 z-20 flex items-center gap-1 rounded-full border border-emerald-300/25 bg-black/40 px-3 py-1.5 text-[11px] font-medium tracking-[0.08em] text-emerald-100 backdrop-blur-md">
         <span
