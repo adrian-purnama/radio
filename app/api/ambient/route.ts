@@ -42,10 +42,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Ambient file must be audio" }, { status: 400 });
     }
 
-    if (audio.size > 32 * 1024 * 1024) {
-      return NextResponse.json({ error: "Ambient audio must be <= 32MB" }, { status: 400 });
-    }
-
     await connectToDatabase();
     const audioFileId = await uploadFileToGridFs(audio, {
       uploadedBy: session.adminId,

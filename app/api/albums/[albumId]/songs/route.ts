@@ -88,10 +88,6 @@ export async function POST(request: Request, { params }: Params) {
       return NextResponse.json({ error: "Audio must be an audio file" }, { status: 400 });
     }
 
-    if (audio.size > 32 * 1024 * 1024) {
-      return NextResponse.json({ error: "Audio must be <= 32MB" }, { status: 400 });
-    }
-
     await connectToDatabase();
     const album = await AlbumModel.findById(albumId).lean();
     if (!album) {
