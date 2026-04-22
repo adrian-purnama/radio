@@ -66,9 +66,14 @@ export function usePlayer() {
 
     const raw = window.localStorage.getItem(VOLUME_STORAGE_KEY);
     const parsed = Number(raw);
-    if (!Number.isNaN(parsed)) {
+    if (!Number.isNaN(parsed) && parsed >= 0 && parsed <= 1) {
       setVolume(Math.max(0, Math.min(1, parsed)));
+      return;
     }
+
+    // First load (or invalid saved value): default to full volume.
+    setVolume(1);
+    window.localStorage.setItem(VOLUME_STORAGE_KEY, "1");
   }, []);
 
   useEffect(() => {
