@@ -28,12 +28,43 @@ type CatalogAlbum = {
   songs: Array<{ id: string; title: string; links: StreamingLinks }>;
 };
 
-const ARTIST_PAGES = [
+type ArtistPage = {
+  label: "Spotify" | "YouTube Music" | "Deezer" | "Apple Music";
+  url: string;
+};
+
+const ARTIST_PAGES: ArtistPage[] = [
   { label: "Spotify", url: "https://open.spotify.com/" },
   { label: "YouTube Music", url: "https://music.youtube.com/" },
   { label: "Deezer", url: "https://www.deezer.com/" },
   { label: "Apple Music", url: "https://music.apple.com/" },
 ];
+
+function PlatformIcon({ label }: { label: ArtistPage["label"] }) {
+  if (label === "Spotify") {
+    return (
+<svg width="20px" height="20px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>Spotify-color</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Color-" transform="translate(-200.000000, -460.000000)" fill="#00DA5A"> <path d="M238.16,481.36 C230.48,476.8 217.64,476.32 210.32,478.6 C209.12,478.96 207.92,478.24 207.56,477.16 C207.2,475.96 207.92,474.76 209,474.4 C217.52,471.88 231.56,472.36 240.44,477.64 C241.52,478.24 241.88,479.68 241.28,480.76 C240.68,481.6 239.24,481.96 238.16,481.36 M237.92,488.08 C237.32,488.92 236.24,489.28 235.4,488.68 C228.92,484.72 219.08,483.52 211.52,485.92 C210.56,486.16 209.48,485.68 209.24,484.72 C209,483.76 209.48,482.68 210.44,482.44 C219.2,479.8 230,481.12 237.44,485.68 C238.16,486.04 238.52,487.24 237.92,488.08 M235.04,494.68 C234.56,495.4 233.72,495.64 233,495.16 C227.36,491.68 220.28,490.96 211.88,492.88 C211.04,493.12 210.32,492.52 210.08,491.8 C209.84,490.96 210.44,490.24 211.16,490 C220.28,487.96 228.2,488.8 234.44,492.64 C235.28,493 235.4,493.96 235.04,494.68 M224,460 C210.8,460 200,470.8 200,484 C200,497.2 210.8,508 224,508 C237.2,508 248,497.2 248,484 C248,470.8 237.32,460 224,460" id="Spotify"> </path> </g> </g> </g></svg>
+    );
+  }
+
+  if (label === "YouTube Music") {
+    return (
+<svg viewBox="0 -3 20 20" width="20px" height="20px" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000" stroke="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>youtube [#168]</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Dribbble-Light-Preview" transform="translate(-300.000000, -7442.000000)" fill="#ff0000"> <g id="icons" transform="translate(56.000000, 160.000000)"> <path d="M251.988432,7291.58588 L251.988432,7285.97425 C253.980638,7286.91168 255.523602,7287.8172 257.348463,7288.79353 C255.843351,7289.62824 253.980638,7290.56468 251.988432,7291.58588 M263.090998,7283.18289 C262.747343,7282.73013 262.161634,7282.37809 261.538073,7282.26141 C259.705243,7281.91336 248.270974,7281.91237 246.439141,7282.26141 C245.939097,7282.35515 245.493839,7282.58153 245.111335,7282.93357 C243.49964,7284.42947 244.004664,7292.45151 244.393145,7293.75096 C244.556505,7294.31342 244.767679,7294.71931 245.033639,7294.98558 C245.376298,7295.33761 245.845463,7295.57995 246.384355,7295.68865 C247.893451,7296.0008 255.668037,7296.17532 261.506198,7295.73552 C262.044094,7295.64178 262.520231,7295.39147 262.895762,7295.02447 C264.385932,7293.53455 264.28433,7285.06174 263.090998,7283.18289" id="youtube-[#168]"> </path> </g> </g> </g> </g></svg>
+    );
+  }
+
+  if (label === "Deezer") {
+    return (
+      <svg viewBox="0 0 24 24" width="20px" height="20px" aria-hidden className="h-3.5 w-3.5 fill-current">
+        <path d="M3 16h3v3H3zm4-2h3v5H7zm4-3h3v8h-3zm4 1h3v7h-3zm4 2h2v5h-2zM3 12h3v3H3zm4-2h3v3H7zm4-2h3v3h-3zm4 1h3v3h-3zM3 8h3v3H3zm4-2h3v3H7zm4-1h3v3h-3z" />
+      </svg>
+    );
+  }
+
+  return (
+<svg xmlns="http://www.w3.org/2000/svg" aria-label="Apple Music" role="img" viewBox="0 0 512 512" width="20px" height="20px" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><rect width="512" height="512" rx="15%" fill="url(#g)"></rect><linearGradient id="g" x1=".5" y1=".99" x2=".5" y2=".02"><stop offset="0" stop-color="#FA233B"></stop><stop offset="1" stop-color="#FB5C74"></stop></linearGradient><path fill="#ffffff" d="M199 359V199q0-9 10-11l138-28q11-2 12 10v122q0 15-45 20c-57 9-48 105 30 79 30-11 35-40 35-69V88s0-20-17-15l-170 35s-13 2-13 18v203q0 15-45 20c-57 9-48 105 30 79 30-11 35-40 35-69"></path></g></svg>
+  );
+}
 
 function toRows(links: StreamingLinks) {
   const rows: Array<{ label: string; url: string }> = [];
@@ -181,8 +212,9 @@ export function LandingPage() {
                     href={page.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-full border border-slate-500/80 bg-slate-900/70 px-3 py-1 text-xs font-medium text-slate-200 transition hover:bg-slate-800"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-slate-500/80 bg-slate-900/70 px-3 py-1 text-xs font-medium text-slate-200 transition hover:bg-slate-800"
                   >
+                    <PlatformIcon label={page.label} />
                     {page.label}
                     <ExternalLink className="h-3 w-3" strokeWidth={1.5} />
                   </a>

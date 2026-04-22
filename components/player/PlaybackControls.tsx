@@ -9,6 +9,8 @@ type Props = {
   onPrevious: () => void;
   onNext: () => void;
   onSeek: (nextTime: number) => void;
+  volume: number;
+  onVolumeChange: (nextVolume: number) => void;
 };
 
 function formatTime(seconds: number) {
@@ -31,6 +33,8 @@ export function PlaybackControls({
   onPrevious,
   onNext,
   onSeek,
+  volume,
+  onVolumeChange,
 }: Props) {
   return (
     <div className="w-full space-y-3">
@@ -89,6 +93,21 @@ export function PlaybackControls({
           {formatTime(currentTime)} / {formatTime(duration)}
         </p>
         <p className="sr-only">Progress {progressPercent.toFixed(0)} percent</p>
+      </div>
+
+      <div className="flex items-center gap-2 text-white/60">
+        <span className="text-[11px]">Vol</span>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={volume}
+          onChange={(event) => onVolumeChange(Number(event.target.value))}
+          className="player-range h-1 w-24 cursor-pointer appearance-none rounded-full bg-white/14 accent-white md:w-28"
+          aria-label="Volume"
+        />
+        <span className="w-8 text-right text-[11px]">{Math.round(volume * 100)}%</span>
       </div>
     </div>
   );

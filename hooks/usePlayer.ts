@@ -29,6 +29,7 @@ type Playlist = {
 
 const PLAYLISTS_STORAGE_KEY = "radio.playlists";
 const SELECTED_PLAYLIST_STORAGE_KEY = "radio.selectedPlaylistId";
+const VOLUME_STORAGE_KEY = "radio.volume";
 
 export function usePlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -38,6 +39,7 @@ export function usePlayer() {
   const autoplayUnlockBoundRef = useRef(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
   const [albums, setAlbums] = useState<AlbumOption[]>([]);
   const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(null);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -58,13 +60,31 @@ export function usePlayer() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const raw = window.localStorage.getItem(VOLUME_STORAGE_KEY);
+    const parsed = Number(raw);
+    if (!Number.isNaN(parsed)) {
+      setVolume(Math.max(0, Math.min(1, parsed)));
+    }
+  }, []);
+
+  useEffect(() => {
+    // Keep current local playback context across page/tab changes.
+    // Fetch server fallback only when there is no active store state yet.
+    if (currentSong || queue.length > 0) {
+      return;
+    }
+
     apiFetch<PlaybackResponse>("/api/playback/current")
       .then(({ song, queue: fetchedQueue }) => {
         setCurrentSong(song);
         setQueue(fetchedQueue);
       })
       .catch(() => undefined);
-  }, [setCurrentSong, setQueue]);
+  }, [currentSong, queue.length, setCurrentSong, setQueue]);
 
   useEffect(() => {
     apiFetch<AlbumsResponse>("/api/albums")
@@ -265,6 +285,17 @@ export function usePlayer() {
     }
   }, [audioReady, isPlaying]);
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+    audio.volume = volume;
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(VOLUME_STORAGE_KEY, String(volume));
+    }
+  }, [audioReady, volume]);
+
   async function goToNextSong() {
     if (mode === "playlist-loop") {
       const selectedPlaylist = playlists.find((playlist) => playlist.id === selectedPlaylistId);
@@ -364,6 +395,13 @@ export function usePlayer() {
     setCurrentTime(safeTime);
   }
 
+  function changeVolume(nextVolume: number) {
+    if (Number.isNaN(nextVolume)) {
+      return;
+    }
+    setVolume(Math.max(0, Math.min(1, nextVolume)));
+  }
+
   const progressPercent = useMemo(() => {
     if (!duration) {
       return 0;
@@ -448,11 +486,13 @@ export function usePlayer() {
     currentTime,
     duration,
     progressPercent,
+    volume,
     setMode: changeMode,
     togglePlay,
     goToNextSong,
     goToPreviousSong,
     seekTo,
+    setVolume: changeVolume,
     chooseAlbumForLoop,
     createPlaylist,
     selectPlaylist,

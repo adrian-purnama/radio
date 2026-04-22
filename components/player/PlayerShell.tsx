@@ -33,6 +33,7 @@ export function PlayerShell() {
     currentTime,
     duration,
     progressPercent,
+    volume,
     setMode,
     chooseAlbumForLoop,
     createPlaylist,
@@ -43,6 +44,7 @@ export function PlayerShell() {
     goToPreviousSong,
     goToNextSong,
     seekTo,
+    setVolume,
   } =
     usePlayer();
 
@@ -180,6 +182,8 @@ export function PlayerShell() {
               onPrevious={goToPreviousSong}
               onNext={() => void goToNextSong()}
               onSeek={seekTo}
+              volume={volume}
+              onVolumeChange={setVolume}
             />
           </article>
         </div>
