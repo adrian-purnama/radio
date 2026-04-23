@@ -188,11 +188,24 @@ export function LandingPage() {
           <div className="absolute inset-0 bg-linear-to-r from-slate-950/82 via-slate-900/56 to-slate-950/48" />
           <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-start px-6 pt-20 md:px-12 md:pt-28">
             <div className="max-w-2xl">
-              <p className="text-xs uppercase tracking-[0.28em] text-sky-200/75">LoFi Radio</p>
-              <h1 className="mt-3 text-[4rem] font-semibold tracking-tight text-slate-100 md:text-6xl">
-                2am Signal
+              <div className="flex items-center gap-3">
+                <span className="h-px w-8 bg-linear-to-r from-transparent via-sky-200/60 to-transparent" />
+                <p className="text-[11px] uppercase tracking-[0.42em] text-sky-200/80">LoFi · Late Night Radio</p>
+              </div>
+              <h1 className="relative mt-4 font-semibold leading-[0.95] tracking-tight">
+                <span className="pointer-events-none absolute -inset-x-6 -inset-y-4 -z-10 rounded-4xl bg-[radial-gradient(ellipse_at_left,rgba(125,211,252,0.18),transparent_60%)] blur-2xl" />
+                <span className="block bg-linear-to-br from-white via-slate-100 to-slate-300/70 bg-clip-text text-[3.25rem] text-transparent drop-shadow-[0_2px_12px_rgba(148,163,184,0.25)] md:text-[5.5rem]">
+                  2am
+                </span>
+                <span className="mt-1 block font-serif text-[3.5rem] italic tracking-tight text-slate-100/95 md:text-[6rem]">
+                  Signal
+                  <span aria-hidden className="ml-1 inline-block translate-y-[-0.35em] text-sky-300/80">.</span>
+                </span>
               </h1>
-              {/* <p className="mt-3 text-base text-slate-300 md:text-lg">Calm radio, one click away.</p> */}
+              <div className="mt-5 flex items-center gap-3">
+                <span className="h-px w-12 bg-sky-200/50" />
+                <p className="text-xs italic text-slate-300/85 md:text-sm">Calm radio, curated for the small hours.</p>
+              </div>
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <Link
                   href="/"
@@ -299,10 +312,17 @@ export function LandingPage() {
             return (
               <article
                 key={album.id}
-                className="album-card relative overflow-visible rounded-3xl border border-slate-700/70 bg-slate-900/65 p-6 shadow-[0_16px_40px_rgba(2,6,23,0.45)] backdrop-blur md:p-8"
+                className="album-card  relative overflow-visible rounded-3xl border border-slate-700/70 bg-slate-900/65 p-6 shadow-[0_16px_40px_rgba(2,6,23,0.45)] backdrop-blur md:p-8"
               >
+                <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+                  <div
+                    className="absolute inset-0 scale-110 bg-cover bg-center opacity-28 blur-[2px]"
+                    style={{ backgroundImage: `url(${album.coverUrl})` }}
+                  />
+                  <div className="absolute inset-0 bg-slate-950/25" />
+                </div>
                 <div
-                  className={`grid items-center gap-10 md:gap-12 ${
+                  className={`relative z-10 grid items-center gap-10 md:gap-12 ${
                     reverse ? "md:grid-cols-[1fr_340px]" : "md:grid-cols-[340px_1fr]"
                   }`}
                 >
